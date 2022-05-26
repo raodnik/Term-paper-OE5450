@@ -1,22 +1,22 @@
 clc;
 clear;
 
-%% Data Import
+%% Import data
 nodes = readmatrix('nodesreduced.xlsx');
 triangles = readmatrix('trianglesreduced.xlsx');
 edge = readmatrix('edgesreduced.xlsx');
-%% Assumptions
-L = 1;
-H = 0.04;
+%% Parameter assumptions
 C = 1;
 Cg = 1;
 T = sqrt(L/1.56);
 w = 2*pi/T;
 k = 2*pi/L;
-direction = 120;
+L = 1;
+H = 0.04;
+ang = 120;
 K = zeros(length(nodes),length(nodes));
 F = zeros(length(nodes),1);
-%% Formulation
+%% K and F matri formulation
 tic
 syms x y
 for i = 1:length(triangles(:,1))
@@ -35,9 +35,6 @@ for i = 1:length(triangles(:,1))
     y1 = coord(2,1);
     y2 = coord(2,2);
     y3 = coord(2,3);
-%     xavg = (x1+x2+x3)/3;
-%     C = sqrt((9.81/k)*tanh(k*xavg/3));
-%     Cg = 0.5*(1+((2*k*xavg)/(sinh(2*k*(xavg/3)))));
     ai = x2*y3-x3*y2;
     bi = y2-y3;
     ci = x3-x2;
@@ -68,9 +65,7 @@ for i = 1:length(triangles(:,1))
     dx21 = x2+((x2-x3)/(y2-y3))*(y-y2);
     dx22 = x1+((x3-x1)/(y3-y1))*(y-y1);
     A = 0.5*(det([x1 y1 1;x2 y2 1;x3 y3 1]));
-%     Ni = ai + bi*x + ci*y;
-%     Nj = aj + bj*x + cj*y;
-%     Nk = ak + bk*x + ck*y;
+
     N11 = ai^2+(x^2*bi^2)+(y^2*ci^2)+(2*ai*x*bi)+(2*ai*y*ci)+(2*x*y*bi*ci);
     N12=(ai*aj)+(ai*x*bj)+(ai*y*cj)+(aj*x*bi)+(x^2*bi*bj)+(x*y*bi*cj)+(aj*y*ci)+(x*y*bj*ci)+(y^2*cj*ci);
     N13=(ai*ak)+(ai*x*bk)+(ai*y*ck)+(ak*x*bi)+(x^2*bi*bk)+(x*y*bi*ck)+(ak*y*ci)+(x*y*bk*ci)+(y^2*ck*ci);
@@ -78,7 +73,6 @@ for i = 1:length(triangles(:,1))
     N23=(aj*ak)+(aj*x*bk)+(aj*y*ck)+(ak*x*bj)+(x^2*bj*bk)+(x*y*bj*ck)+(ak*y*cj)+(x*y*bk*cj)+(y^2*ck*cj);
     N33= ak^2+(x^2*bk^2)+(y^2*ck^2)+(2*ak*x*bk)+(2*ak*y*ck)+(2*x*y*bk*ck);
     N_new = [N11 N12 N13 N22 N23 N33];
-%     N = [Ni Nj Nk];
     F1 = int(N_new,x,dx11,dx12);
     F1 = int(F1,y,dy11,dy12);
     F2 = int(N_new,x,dx21,dx22);
@@ -103,7 +97,7 @@ for i = 1:length(triangles(:,1))
     
 end
 toc
-%% tou2 LHS and tou2 RHS
+%% fluid domain boundary 
 tic
 syms theta
 for  i = 1:length(edge(:,1))
@@ -133,7 +127,7 @@ for  i = 1:length(edge(:,1))
     K4 = double(K4);
     K4 = K4./(4*A^2);
     F_without_phi = 2*K4;
-    phi_incident = [H*0.5*exp(1i*k*r1*cosd(direction)); H*0.5*exp(1i*k*r2*cosd(direction))];
+    phi_incident = [H*0.5*exp(1i*k*r1*cosd(ang)); H*0.5*exp(1i*k*r2*cosd(ang))];
     F_final = imag(F_without_phi*phi_incident);
     K(edge(i,1),edge(i,1)) = K(edge(i,1),edge(i,1)) + K4(1,1);
     K(edge(i,1),edge(i,2)) = K(edge(i,1),edge(i,2)) + K4(1,2);
@@ -143,7 +137,7 @@ for  i = 1:length(edge(:,1))
     F(edge(i,2),1) = F(edge(i,2),1) + F_final(2,1);
 end
 toc
-%% Load Shore data
+%% Shore Data import
 edge_shore = readmatrix('edgesshore.xlsx');
 K(edge_shore(:,1)',:) = [];
 K(:,edge_shore(:,1)') = [];
@@ -173,7 +167,7 @@ Y = nodes(:,3);
 % end
 % contour(x,y,cos(Z2).*Z1)
 
-%% Wave Profile
+%% surface plot for wave
 Z = etamagnitude.*cos(eta_phase_radian.*(180/pi));
 % Z = reshape(Z,[length(nodes),length(nodes)]);
 j=1;
