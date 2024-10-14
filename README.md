@@ -1,8 +1,8 @@
 Hi, I’m DurgaRaoN
 
-  I’m someone who is passionate about Computational Engineering, Machine Learning.
+  I’m someone who is passionate about Computational Engineering, Machine Learning and Dynamic analysis on offshore structures.
 
-  Currently, I'm Masters student at the Indian Institute of Technology, Madras. I'm majoring in Ocean Engineering and my minor is Machine Learning.
+  Currently, I'm working as a subsea engineer at a MNC company. I majored in Ocean Engineering from IIT Madras
   
   My main driver is Matlab, but I'm also proficient in Python and C++.
   
